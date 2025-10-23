@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("jvm") version "1.9.20"
-//    id("org.jetbrains.compose") version "1.5.10"
+    id("org.jetbrains.compose") version "1.5.10"
 }
 
 android {
@@ -61,4 +61,37 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     implementation(compose.desktop.currentOs)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+}
+
+compose.desktop {
+    application {
+        mainClass = "MainKt"
+
+        nativeDistributions {
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            packageName = "NotificationSystem"
+            packageVersion = "1.0.0"
+
+            // Windows specific configuration
+            windows {
+                menuGroup = "Notification System"
+                upgradeUuid = "A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
+            }
+
+            // macOS specific configuration
+            macOS {
+                bundleID = "com.example.notificationsystem"
+            }
+
+            // Linux specific configuration
+            linux {
+                packageName = "notification-system"
+            }
+        }
+    }
+}
+
+kotlin {
+    jvmToolchain(17)
 }
