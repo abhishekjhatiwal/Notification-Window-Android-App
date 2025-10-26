@@ -1,37 +1,23 @@
+// NotificationSystem.kt
 package com.example.notificationwindow
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Card
 
 // Notification data class
 data class NotificationData(
@@ -52,18 +38,40 @@ enum class NotificationType(val color: Color, val icon: ImageVector) {
     ERROR(Color(0xFFF44336), Icons.Default.Error)
 }
 
-// Notification Manager
-class NotificationManager {
+// Notification Manager - Singleton
+object NotificationManager {
     private val _notifications = mutableStateListOf<Pair<String, NotificationData>>()
     val notifications: List<Pair<String, NotificationData>> = _notifications
 
+    // Main method to show notifications
     fun show(notification: NotificationData) {
         val id = System.currentTimeMillis().toString()
         _notifications.add(id to notification)
     }
 
+    // Convenience methods
+    fun showInfo(title: String, message: String, onAction: (() -> Unit)? = null) {
+        show(NotificationData(title, message, type = NotificationType.INFO, onAction = onAction))
+    }
+
+    fun showSuccess(title: String, message: String, onAction: (() -> Unit)? = null) {
+        show(NotificationData(title, message, type = NotificationType.SUCCESS, onAction = onAction))
+    }
+
+    fun showWarning(title: String, message: String, onAction: (() -> Unit)? = null) {
+        show(NotificationData(title, message, type = NotificationType.WARNING, onAction = onAction))
+    }
+
+    fun showError(title: String, message: String, onAction: (() -> Unit)? = null) {
+        show(NotificationData(title, message, type = NotificationType.ERROR, onAction = onAction))
+    }
+
     fun dismiss(id: String) {
         _notifications.removeIf { it.first == id }
+    }
+
+    fun dismissAll() {
+        _notifications.clear()
     }
 }
 
@@ -79,29 +87,30 @@ fun NotificationWindow(
     LaunchedEffect(Unit) {
         delay(notification.duration)
         visible = false
-        delay(300) // Wait for animation
+        delay(300)
         onDismiss()
     }
 
     AnimatedVisibility(
         visible = visible,
-        enter = slideInHorizontally(
-            initialOffsetX = { it },
+        enter = slideInVertically(
+            initialOffsetY = { -it },
             animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f)
         ) + fadeIn(),
-        exit = slideOutHorizontally(
-            targetOffsetX = { it },
+        exit = slideOutVertically(
+            targetOffsetY = { -it },
             animationSpec = tween(300)
         ) + fadeOut()
     ) {
         Card(
             modifier = Modifier
-                .width(400.dp)
-                .padding(8.dp)
-                .shadow(8.dp, RoundedCornerShape(12.dp)),
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             shape = RoundedCornerShape(12.dp),
-            backgroundColor = Color(0xFF1E1E1E),
-            elevation = 8.dp
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFF1E1E1E)
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Row(
                 modifier = Modifier
@@ -188,192 +197,25 @@ fun NotificationWindow(
 }
 
 @Composable
-fun NotificationContainer(manager: NotificationManager) {
+fun NotificationContainer() {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.TopEnd
+        contentAlignment = Alignment.TopCenter
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
-                .widthIn(max = 420.dp),
+                .fillMaxWidth()
+                .padding(top = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            manager.notifications.forEach { (id, notification) ->
+            NotificationManager.notifications.forEach { (id, notification) ->
                 key(id) {
                     NotificationWindow(
                         notification = notification,
-                        onDismiss = { manager.dismiss(id) }
+                        onDismiss = { NotificationManager.dismiss(id) }
                     )
                 }
             }
         }
     }
 }
-
-@Composable
-fun DemoApp(manager: NotificationManager) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            "Window Notification System",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Text(
-            "Click buttons to test different notification types",
-            fontSize = 14.sp,
-            color = Color.Gray
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Info Notification
-        Button(
-            onClick = {
-                manager.show(
-                    NotificationData(
-                        title = "Information",
-                        message = "This is an informational message with important details.",
-                        type = NotificationType.INFO
-                    )
-                )
-            },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF2196F3)),
-            modifier = Modifier.width(300.dp)
-        ) {
-            Icon(Icons.Default.Info, null, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(8.dp))
-            Text("Show Info Notification", color = Color.White)
-        }
-
-        // Success Notification
-        Button(
-            onClick = {
-                manager.show(
-                    NotificationData(
-                        title = "Success!",
-                        message = "Your operation completed successfully.",
-                        type = NotificationType.SUCCESS,
-                        onAction = { println("Success action clicked!") },
-                        actionText = "View Details"
-                    )
-                )
-            },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF4CAF50)),
-            modifier = Modifier.width(300.dp)
-        ) {
-            Icon(Icons.Default.CheckCircle, null, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(8.dp))
-            Text("Show Success Notification", color = Color.White)
-        }
-
-        // Warning Notification
-        Button(
-            onClick = {
-                manager.show(
-                    NotificationData(
-                        title = "Warning",
-                        message = "Please review this warning message carefully.",
-                        type = NotificationType.WARNING,
-                        icon = Icons.Default.Warning
-                    )
-                )
-            },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFFC107)),
-            modifier = Modifier.width(300.dp)
-        ) {
-            Icon(Icons.Default.Warning, null, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(8.dp))
-            Text("Show Warning Notification", color = Color.Black)
-        }
-
-        // Error Notification
-        Button(
-            onClick = {
-                manager.show(
-                    NotificationData(
-                        title = "Error Occurred",
-                        message = "An error has occurred. Please try again.",
-                        type = NotificationType.ERROR,
-                        onAction = { println("Retry clicked!") },
-                        actionText = "Retry",
-                        duration = 7000L
-                    )
-                )
-            },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF44336)),
-            modifier = Modifier.width(300.dp)
-        ) {
-            Icon(Icons.Default.Error, null, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(8.dp))
-            Text("Show Error Notification", color = Color.White)
-        }
-
-        // Custom Notification
-        Button(
-            onClick = {
-                manager.show(
-                    NotificationData(
-                        title = "Custom Notification",
-                        message = "This notification has a custom icon and longer duration.",
-                        icon = Icons.Default.Star,
-                        type = NotificationType.INFO,
-                        duration = 8000L
-                    )
-                )
-            },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF9C27B0)),
-            modifier = Modifier.width(300.dp)
-        ) {
-            Icon(Icons.Default.Star, null, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(8.dp))
-            Text("Show Custom Notification", color = Color.White)
-        }
-    }
-}
-
-
-
-/*
-
-fun main() = application {
-    val manager = remember { NotificationManager() }
-
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "Notification System - Jetpack Compose",
-        state = rememberWindowState(
-            size = DpSize(800.dp, 600.dp),
-            position = WindowPosition(Alignment.Center)
-        )
-    ) {
-        MaterialTheme(
-            colors = lightColors(
-                primary = Color(0xFF2196F3),
-                secondary = Color(0xFF4CAF50)
-            )
-        ) {
-            Box {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = Color(0xFFF5F5F5)
-                ) {
-                    DemoApp(manager)
-                }
-
-                // Notification overlay
-                NotificationContainer(manager)
-            }
-        }
-    }
-}
-
-
- */
