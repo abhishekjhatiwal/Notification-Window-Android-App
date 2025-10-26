@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
                         // Main content
-                     //   MainContent()
+                        MainContent()
 
                         // Notification overlay (REQUIRED!)
                         NotificationContainer()
