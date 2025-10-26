@@ -64,12 +64,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
     implementation("androidx.compose.material3:material3:1.4.0")
-    implementation("androidx.compose.material:material-icons-core:1.7.8")
+//    implementation("androidx.compose.material:material-icons-core:1.7.8")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     implementation("org.jetbrains.compose.material:material-icons-extended-desktop:1.7.3")
-}
-
-kotlin {
-    jvmToolchain(17)
 }
