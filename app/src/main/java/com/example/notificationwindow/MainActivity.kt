@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import com.example.notificationwindow.screen.MainContent
+import com.example.notificationwindow.screen.NotificationContainer
 import com.example.notificationwindow.ui.theme.NotificationWindowTheme
 
 class MainActivity : ComponentActivity() {
