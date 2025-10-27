@@ -23,6 +23,6 @@ data class NotificationData(
 enum class NotificationType(val color: Color, val icon: ImageVector) {
     INFO(Color(0xFF2196F3), Icons.Default.Info),
     SUCCESS(Color(0xFF4CAF50), Icons.Default.CheckCircle),
-    WARNING(Color(0xFFFFC107), Icons.Default.Warning),
+    WARNING(Color(0xFFEEC344), Icons.Default.Warning),
     ERROR(Color(0xFFF44336), Icons.Default.Error)
 }
