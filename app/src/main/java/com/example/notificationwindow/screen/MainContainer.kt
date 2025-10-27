@@ -249,7 +249,7 @@ fun MainContent() {
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "💡 Usage Example:",
+                    text = "💡 Usage Example:🧐",
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
                 )
@@ -264,7 +264,6 @@ fun MainContent() {
         }
     }
 }
-
 
 
 /*
